@@ -1,0 +1,72 @@
+--select sum(new_cases) as "total cases",SUM(cast(new_deaths as int)) as "total deaths",SUM(cast(new_deaths as int))/sum(new_cases)*100 as "Death percentage"
+--from [Portfolio Project]..['covid deaths$']
+--where continent is not NULL
+----group by date
+--order by 1,2
+--select date,sum(new_cases) as "total cases",SUM(cast(new_deaths as int)) as "total deaths",SUM(cast(new_deaths as int))/sum(new_cases)*100 as "Death percentage"
+--from [Portfolio Project]..['covid deaths$']
+--where continent is not NULL
+--group by date
+--order by 1,2
+--select * from [Portfolio Project]..['covid deaths$']
+--select * from [Portfolio Project]..['covid vacination$']
+--select * from [Portfolio Project]..['covid deaths$']
+--select * from [Portfolio Project]..['covid vacination$']
+--select death.continent,death.location,death.date,death.population,vacine.new_vaccinations from 
+--[Portfolio Project]..['covid deaths$'] death
+--join [Portfolio Project]..['covid vacination$'] vacine
+--on death.date=vacine.date and  death.location=vacine.location
+--where death.continent is not NULL and death.location like '%India%'
+--order by 2,3
+--select death.continent,death.location,death.date,death.population,vacine.new_vaccinations ,sum(cast(vacine.new_vaccinations as bigint)) OVER (partition by death.location order by death.location,death.date) as "rollingPeopleVaccinated", from 
+--[Portfolio Project]..['covid deaths$'] death
+--join [Portfolio Project]..['covid vacination$'] vacine
+--on death.date=vacine.date and  death.location=vacine.location
+--where death.continent is not NULL 
+--order by 2,3
+
+--With PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
+--as
+--(
+--Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+--, SUM(cast(vac.new_vaccinations as bigint)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+--, (RollingPeopleVaccinated/population)*100
+--From [Portfolio Project]..['covid deaths$'] dea
+--Join [Portfolio Project]..['covid vacination$'] vac
+--	On dea.location = vac.location
+--	and dea.date = vac.date
+--where dea.continent is not null 
+--order by 2,3
+--)
+--Select *, (RollingPeopleVaccinated/Population)*100
+--From PopvsVac
+--DROP Table if exists #PercentPopulationVaccinated
+--Create Table #PercentPopulationVaccinated
+--(
+--Continent nvarchar(255),
+--Location nvarchar(255),
+--Date datetime,
+--Population numeric,
+--New_vaccinations numeric,
+--RollingPeopleVaccinated numeric
+--)
+--Insert into #PercentPopulationVaccinated
+--Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+--, SUM(cast(vac.new_vaccinations as bigint)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+--, (RollingPeopleVaccinated/population)*100
+--From [Portfolio Project]..['covid deaths$'] dea
+--Join [Portfolio Project]..['covid vacination$'] vac
+--	On dea.location = vac.location
+--	and dea.date = vac.date
+---where dea.continent is not null 
+--order by 2,3
+
+--Create View PercentPopulationVaccinated as
+--Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+--, SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+--, (RollingPeopleVaccinated/population)*100
+--From[Portfolio Project]..['covid deaths$'] dea
+--Join [Portfolio Project]..['covid vacination$'] vac
+--	On dea.location = vac.location
+--	and dea.date = vac.date
+--where dea.continent is not null 
